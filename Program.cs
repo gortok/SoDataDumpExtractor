@@ -1,13 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using SharpCompress.Archive;
 using SharpCompress.Common;
-using SharpCompress.Reader;
 
 namespace XmlParser
 {
@@ -43,12 +37,14 @@ namespace XmlParser
                         }
                         catch (System.InvalidOperationException ex)
                         {
-
+                            Console.WriteLine("file read error: {0}", ex.ToString());
+                            
                             failedFileReads += String.Format("{0}\n", file);
                             failedFileReadCount++;
                         }
                         catch (System.IndexOutOfRangeException ex)
                         {
+                            Console.WriteLine("error: {0}\n", ex.ToString());
                             failedIndexes += String.Format("{0}\n", file);
                             failedIndexCount++;
 
