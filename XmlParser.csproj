@@ -50,9 +50,9 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\StatPersistence\StackStats.csproj">
+    <ProjectReference Include="..\StatPersistence\StatsPersistence.csproj">
       <Project>{2bc82f77-de84-4555-ac43-5dd8f1f02caa}</Project>
-      <Name>StackStats</Name>
+      <Name>StatsPersistence</Name>
     </ProjectReference>
     <ProjectReference Include="sharpcompress\SharpCompress\SharpCompress.Unsigned.csproj">
       <Project>{27d535cb-2fd3-4621-8c9a-46161fc77a5d}</Project>
