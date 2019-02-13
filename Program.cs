@@ -1,9 +1,9 @@
 ﻿using System;
 using System.IO;
-using SharpCompress.Archive;
+using SharpCompress.Archives;
 using SharpCompress.Common;
 
-namespace XmlParser
+namespace SoDataDumpExtractor
 {
     class Program
     {
@@ -17,34 +17,27 @@ namespace XmlParser
                 var failedFileReadCount = 0;
                 var successfulExtractFileCount = 0;
                 var successfulExtracts = "successfully extracted:\n";
+                SharpCompress.Common.ExtractionOptions options = new ExtractionOptions
+                {
+                    Overwrite = true,
+                    ExtractFullPath = true
+                };
                 try
                 {
                     foreach (var file in Directory.GetFiles(args[0], "*.7z"))
                     {
-                        
+
                         try
                         {
-                            var archive = ArchiveFactory.Open(File.OpenRead(file));
-                            foreach (var entry in archive.Entries)
-                            {
-
-                                var directoryToWriteTo = args[0];
-                                entry.WriteToDirectory(Path.Combine(directoryToWriteTo, file.Replace(".7z", "")),
-                                    ExtractOptions.ExtractFullPath | ExtractOptions.Overwrite);
-                                successfulExtracts += String.Format("{0}: {1}\n", file, entry.Key);
-                                
-                            }
+                            ExtractZippedArchives(args, successfulExtracts, options, file);
                         }
-                        catch (System.InvalidOperationException ex)
+                        catch (System.InvalidOperationException)
                         {
-                            Console.WriteLine("file read error: {0}", ex.ToString());
-                            
                             failedFileReads += String.Format("{0}\n", file);
                             failedFileReadCount++;
                         }
-                        catch (System.IndexOutOfRangeException ex)
+                        catch (System.IndexOutOfRangeException)
                         {
-                            Console.WriteLine("error: {0}\n", ex.ToString());
                             failedIndexes += String.Format("{0}\n", file);
                             failedIndexCount++;
 
@@ -77,14 +70,24 @@ namespace XmlParser
                     Console.WriteLine("Couldn't find the path you're looking for. 404. Except those don't exist. Sooooo. {0} \n", ex);
                 }
                 Console.WriteLine("Results:\n");
-                Console.WriteLine("Successful: {0}, Failed To Read: {1}, Failed to Extract (IndexOutOfRangeException): {2}\n", failedFileReadCount, failedIndexCount, successfulExtractFileCount);
-                Console.WriteLine("Files Successfully extracted: {0}", successfulExtracts);
+                Console.WriteLine("Successful: {0}, Failed To Read: {1}, Failed to Extract (IndexOutOfRangeException): {2}\n", successfulExtractFileCount, failedFileReadCount, failedIndexCount );
                 Console.WriteLine("Failures:");
                 Console.WriteLine(failedFileReads);
                 Console.WriteLine("----------");
-                Console.WriteLine("Index Out of bounds\n");
+                Console.WriteLine("Index Out of bounds:");
                 Console.WriteLine(failedIndexes);
-                
+
+            }
+        }
+
+        private static void ExtractZippedArchives(string[] args, string successfulExtracts, ExtractionOptions options, string file)
+        {
+            var archive = ArchiveFactory.Open(File.OpenRead(file));
+            foreach (var entry in archive.Entries)
+            {
+
+                var directoryToWriteTo = args[0];
+                entry.WriteToDirectory(Path.Combine(directoryToWriteTo, file.Replace(".7z", "")), options);
             }
         }
     }
