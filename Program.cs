@@ -26,10 +26,10 @@ namespace SoDataDumpExtractor
                 {
                     foreach (var file in Directory.GetFiles(args[0], "*.7z"))
                     {
-
+                        var writePath = args[0];
                         try
                         {
-                            ExtractZippedArchives(args, successfulExtracts, options, file);
+                            ExtractZippedArchives(writePath, options, file);
                         }
                         catch (System.InvalidOperationException)
                         {
@@ -80,13 +80,13 @@ namespace SoDataDumpExtractor
             }
         }
 
-        private static void ExtractZippedArchives(string[] args, string successfulExtracts, ExtractionOptions options, string file)
+        private static void ExtractZippedArchives(string toWritePath, ExtractionOptions options, string file)
         {
             var archive = ArchiveFactory.Open(File.OpenRead(file));
             foreach (var entry in archive.Entries)
             {
 
-                var directoryToWriteTo = args[0];
+                var directoryToWriteTo = toWritePath;
                 entry.WriteToDirectory(Path.Combine(directoryToWriteTo, file.Replace(".7z", "")), options);
             }
         }
