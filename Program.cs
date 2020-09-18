@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Threading.Tasks;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 
@@ -22,28 +23,34 @@ namespace SoDataDumpExtractor
                     Overwrite = true,
                     ExtractFullPath = true
                 };
+                Console.WriteLine("Start Time: {0}", DateTime.Now);
                 try
                 {
-                    foreach (var file in Directory.GetFiles(args[0], "*.7z"))
+                    //structure: e:\stackexchange\<sitename>.{meta}.stackexchange.com.7z
+                    Parallel.ForEach(Directory.GetFiles(args[0], "*.7z"), (file) =>
                     {
-                        var writePath = args[0];
-                        try
                         {
-                            ExtractZippedArchives(writePath, options, file);
-                        }
-                        catch (System.InvalidOperationException)
-                        {
-                            failedFileReads += String.Format("{0}\n", file);
-                            failedFileReadCount++;
-                        }
-                        catch (System.IndexOutOfRangeException)
-                        {
-                            failedIndexes += String.Format("{0}\n", file);
-                            failedIndexCount++;
+                            //write back to same directory; 7zip will create a directory matching the filename (minus the .7z)
+                            //except for stackoverflow, serverfault, superuser, they're specially named.
+                            var writePath = args[0];
+                            try
+                            {
+                                ExtractZippedArchives(writePath, options, file);
+                            }
+                            catch (System.InvalidOperationException)
+                            {
+                                failedFileReads += String.Format("{0}\n", file);
+                                failedFileReadCount++;
+                            }
+                            catch (System.IndexOutOfRangeException)
+                            {
+                                failedIndexes += String.Format("{0}\n", file);
+                                failedIndexCount++;
 
+                            }
+                            successfulExtractFileCount++;
                         }
-                        successfulExtractFileCount++;
-                    }
+                    });
                 }
                 catch (UnauthorizedAccessException ex)
                 {
@@ -69,6 +76,7 @@ namespace SoDataDumpExtractor
                 {
                     Console.WriteLine("Couldn't find the path you're looking for. 404. Except those don't exist. Sooooo. {0} \n", ex);
                 }
+                Console.WriteLine("End Time: {0}", DateTime.Now);
                 Console.WriteLine("Results:\n");
                 Console.WriteLine("Successful: {0}, Failed To Read: {1}, Failed to Extract (IndexOutOfRangeException): {2}\n", successfulExtractFileCount, failedFileReadCount, failedIndexCount );
                 Console.WriteLine("Failures:");
